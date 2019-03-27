@@ -4,8 +4,8 @@ from app import api
 from app.services.AuthManager import AuthManager
 
 registration_request_model = api.model('RegistrationRequest', {
-    'username': fields.String(description='Username пользователя'),
-    'password': fields.String(description='Пароль пользователя')
+    'username': fields.String(required=True, description='Username пользователя'),
+    'password': fields.String(required=True, description='Пароль пользователя')
 })
 registration_response_model = api.model('RegistrationResponse', {
     'status': fields.String(description='Статус'),

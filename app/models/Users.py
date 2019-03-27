@@ -9,7 +9,7 @@ class Users(BaseDbModel):
     id = PrimaryKeyField(null=False)
     username = TextField(unique=True, null=False)
     password = TextField(null=False)
-    reg_date = DateTimeField(default=datetime.now)
+    registration_date = DateTimeField(default=datetime.now)
     active = BooleanField(default=False)
 
 

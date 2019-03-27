@@ -2,6 +2,7 @@ import bcrypt
 
 from secrets import token_hex
 
+from app import db
 from app.models.SecretKeys import SecretKeys
 from app.models.Users import Users
 
@@ -12,13 +13,13 @@ class AuthManager:
     @staticmethod
     def register_user(username, password):
         hash = str(bcrypt.hashpw(str.encode(password), bcrypt.gensalt()), 'utf-8')
-        if not Users.select(Users.username).where(
-                Users.username == username):
-            Users.create(username=username, password=hash)
-            SecretKeys.create(username=username, key=token_hex(TOKEN_LENGHT))
-            return False
-        else:
-            return True
+        with db.atomic():
+            if not Users.select(Users.username).where(Users.username == username):
+                user = Users.create(username=username, password=hash)
+                SecretKeys.create(user_id=user.id, key=token_hex(TOKEN_LENGHT))
+                return False
+            else:
+                return True
 
     @staticmethod
     def check_user(username, password):
