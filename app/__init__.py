@@ -5,7 +5,7 @@ from flask_restplus import Api
 from app.models.Config import Config
 
 config = Config()
-config.load('config_dev.json')
+config.load('config.json')
 
 db = peewee.SqliteDatabase(config.db_name)
 

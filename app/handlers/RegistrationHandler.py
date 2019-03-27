@@ -1,7 +1,7 @@
 from flask_restplus import Resource, fields
 
 from app import api
-from app.AuthManager import AuthManager
+from app.services.AuthManager import AuthManager
 
 registration_request_model = api.model('RegistrationRequest', {
     'username': fields.String(description='Username пользователя'),

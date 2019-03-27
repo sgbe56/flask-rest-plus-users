@@ -1,18 +1,16 @@
 from datetime import datetime
 
-import peewee
+from peewee import PrimaryKeyField, TextField, DateTimeField, BooleanField
 
-from app import db
+from app.models.BaseDbModel import BaseDbModel
 
 
-class Users(peewee.Model):
-    id = peewee.PrimaryKeyField(null=False)
-    username = peewee.TextField(unique=True, null=False)
-    password = peewee.TextField(null=False)
-    reg_date = peewee.DateTimeField(default=datetime.now)
-
-    class Meta:
-        database = db
+class Users(BaseDbModel):
+    id = PrimaryKeyField(null=False)
+    username = TextField(unique=True, null=False)
+    password = TextField(null=False)
+    reg_date = DateTimeField(default=datetime.now)
+    active = BooleanField(default=False)
 
 
 Users.create_table()

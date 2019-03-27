@@ -1,6 +1,11 @@
 import bcrypt
 
+from secrets import token_hex
+
+from app.models.SecretKeys import SecretKeys
 from app.models.Users import Users
+
+TOKEN_LENGHT = 16
 
 
 class AuthManager:
@@ -10,6 +15,7 @@ class AuthManager:
         if not Users.select(Users.username).where(
                 Users.username == username):
             Users.create(username=username, password=hash)
+            SecretKeys.create(username=username, key=token_hex(TOKEN_LENGHT))
             return False
         else:
             return True
@@ -22,3 +28,10 @@ class AuthManager:
                                   bytes(hash, 'utf-8'))
         except Users.DoesNotExist:
             return False
+
+    @staticmethod
+    def user_is_active(username):
+        user = Users.get_or_none(Users.username == username)
+        if user:
+            return user.active
+        return {'status': 'Error', 'message': 'Пользователя не существует'}
