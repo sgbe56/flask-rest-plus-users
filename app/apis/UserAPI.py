@@ -2,12 +2,15 @@ from flask import session
 from flask_restplus import Resource, fields, Namespace
 
 from app import db
-from app.services.BasicAuthManager import auth_required
 from app.models.SecretKeys import SecretKeys
 from app.models.Users import Users
+from app.services.BasicAuthManager import auth_required
 
 ns = Namespace('UserAPI', path='/user', description='Работа пользователями')
 
+activate_user_request_model = ns.model('ActivateUserRequestModel', {
+    'key': fields.String(description='Ключ активации пользователя')
+})
 user_fields = ns.model('UserFields', {
     'id': fields.Integer(description='id пользователя'),
     'username': fields.String(description='Username пользователя'),
@@ -67,6 +70,7 @@ class AllUsers(Resource):
 @ns.route('/activate')
 class UserActivate(Resource):
     @ns.doc(description='Активация учётной записи')
+    @ns.expect(activate_user_request_model)
     @ns.response(model=activate_user_response_model, skip_none=True, code=406, description='Not Acceptable')
     @ns.marshal_with(activate_user_response_model, skip_none=True, code=202, description='Accepted')
     def post(self):

@@ -1,6 +1,6 @@
-import bcrypt
-
 from secrets import token_hex
+
+import bcrypt
 
 from app import db
 from app.models.SecretKeys import SecretKeys

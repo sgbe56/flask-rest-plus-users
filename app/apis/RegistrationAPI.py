@@ -33,7 +33,7 @@ class Registration(Resource):
                                   subject='Account activating',
                                   sender=config.mail.mail_username,
                                   recipients=[username]
-                    )
+                                  )
                     connection.send(msg)
                 return {'status': 'Success', 'message': 'Пользователь зарегистрирован'}, 201
             else:
