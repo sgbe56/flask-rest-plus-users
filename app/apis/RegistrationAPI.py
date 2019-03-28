@@ -1,7 +1,8 @@
-from flask_restplus import Resource, fields
+from flask_restplus import Resource, fields, Namespace
 
-from app import api
 from app.services.AuthManager import AuthManager
+
+api = Namespace('RegistrationAPI', description='Регистрация нового пользователя')
 
 registration_request_model = api.model('RegistrationRequest', {
     'username': fields.String(required=True, description='Username пользователя'),
@@ -13,7 +14,7 @@ registration_response_model = api.model('RegistrationResponse', {
 })
 
 
-@api.route('/api/registration')
+@api.route('')
 class Registration(Resource):
     @api.doc(description='Регистрация нового пользователя')
     @api.expect(registration_request_model)
