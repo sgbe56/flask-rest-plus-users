@@ -1,9 +1,9 @@
 from flask_restplus import Api
 
-from .RegistrationAPI import api as registration_namespace
-from .UserAPI import api as user_namespace
+from .RegistrationAPI import ns as registration_namespace
+from .UserAPI import ns as user_namespace
 
-api = Api()
+api = Api(prefix='/api', doc='/docs')
 
-api.add_namespace(registration_namespace, path='/api/registration')
-api.add_namespace(user_namespace, path='/api/user')
+api.add_namespace(registration_namespace)
+api.add_namespace(user_namespace)

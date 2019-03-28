@@ -1,31 +1,40 @@
+from flask_mail import Message
 from flask_restplus import Resource, fields, Namespace
 
+from app import mail, config
 from app.services.AuthManager import AuthManager
 
-api = Namespace('RegistrationAPI', description='Регистрация нового пользователя')
+ns = Namespace('RegistrationAPI', path='/registration', description='Регистрация нового пользователя')
 
-registration_request_model = api.model('RegistrationRequest', {
+registration_request_model = ns.model('RegistrationRequest', {
     'username': fields.String(required=True, description='Username пользователя'),
     'password': fields.String(required=True, description='Пароль пользователя')
 })
-registration_response_model = api.model('RegistrationResponse', {
+registration_response_model = ns.model('RegistrationResponse', {
     'status': fields.String(description='Статус'),
     'message': fields.String(description='Сообщение')
 })
 
 
-@api.route('')
+@ns.route('/')
 class Registration(Resource):
-    @api.doc(description='Регистрация нового пользователя')
-    @api.expect(registration_request_model)
-    @api.response(model=registration_response_model, code=400, description='Bad request')
-    @api.response(model=registration_response_model, code=406, description='Not Acceptable')
-    @api.marshal_with(registration_response_model, code=201, description='Object created')
+    @ns.doc(description='Регистрация нового пользователя')
+    @ns.expect(registration_request_model)
+    @ns.response(model=registration_response_model, code=400, description='Bad request')
+    @ns.response(model=registration_response_model, code=406, description='Not Acceptable')
+    @ns.marshal_with(registration_response_model, code=201, description='Object created')
     def post(self):
-        if api.payload['username'] and api.payload['password']:
-            username = api.payload['username']
-            login_exist = AuthManager.register_user(username, api.payload['password'])
+        if ns.payload['username'] and ns.payload['password']:
+            username = ns.payload['username']
+            login_exist = AuthManager.register_user(username, ns.payload['password'])
             if not login_exist:
+                with mail.connect() as connection:
+                    msg = Message(body='Test',
+                                  subject='Account activating',
+                                  sender=config.mail.mail_username,
+                                  recipients=[username]
+                    )
+                    connection.send(msg)
                 return {'status': 'Success', 'message': 'Пользователь зарегистрирован'}, 201
             else:
                 return {'status': 'Error', 'message': 'Логин занят другим пользователем'}, 406

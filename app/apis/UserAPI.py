@@ -6,35 +6,35 @@ from app.services.BasicAuthManager import auth_required
 from app.models.SecretKeys import SecretKeys
 from app.models.Users import Users
 
-api = Namespace('UserAPI', description='Работа пользователями')
+ns = Namespace('UserAPI', path='/user', description='Работа пользователями')
 
-user_fields = api.model('UserFields', {
+user_fields = ns.model('UserFields', {
     'id': fields.Integer(description='id пользователя'),
     'username': fields.String(description='Username пользователя'),
     'reg_date': fields.String(description='Дата регистарции пользователя'),
 })
 
-auth_user_response_model = api.model('AuthUserResponse', {
+auth_user_response_model = ns.model('AuthUserResponse', {
     'status': fields.String(description='Статус'),
     'message': fields.String(description='Сообщение'),
     'user': fields.Nested(user_fields, skip_none=True, description='Информация о пользователе')
 })
-auth_all_users_response_model = api.model('AuthAllUsersResponse', {
+auth_all_users_response_model = ns.model('AuthAllUsersResponse', {
     'status': fields.String(description='Статус'),
     'message': fields.String(description='Сообщение'),
     'users': fields.List(cls_or_instance=fields.String, description='Список username всех пользователей')
 })
-activate_user_response_model = api.model('ActivateUserResponse', {
+activate_user_response_model = ns.model('ActivateUserResponse', {
     'status': fields.String(description='Статус'),
     'message': fields.String(description='Сообщение'),
 })
 
 
-@api.route('')
+@ns.route('/')
 class UserData(Resource):
-    @api.doc(description='Получение информации о пользователе')
-    @api.response(model=auth_user_response_model, skip_none=True, code=401, description='Unauthorized')
-    @api.marshal_with(auth_user_response_model, skip_none=True, code=202, description='Accepted')
+    @ns.doc(description='Получение информации о пользователе')
+    @ns.response(model=auth_user_response_model, skip_none=True, code=401, description='Unauthorized')
+    @ns.marshal_with(auth_user_response_model, skip_none=True, code=202, description='Accepted')
     @auth_required
     def get(self):
         if session['username']:
@@ -50,12 +50,12 @@ class UserData(Resource):
                    }, 202
 
 
-@api.route('/all')
+@ns.route('/all')
 class AllUsers(Resource):
-    @api.doc(description='Получение списка всех пользователей')
-    @api.response(model=auth_all_users_response_model, skip_none=True, code=401, description='Unauthorized')
-    @api.response(model=auth_all_users_response_model, skip_none=True, code=403, description='Forbidden')
-    @api.marshal_with(auth_all_users_response_model, skip_none=True, code=202, description='Accepted')
+    @ns.doc(description='Получение списка всех пользователей')
+    @ns.response(model=auth_all_users_response_model, skip_none=True, code=401, description='Unauthorized')
+    @ns.response(model=auth_all_users_response_model, skip_none=True, code=403, description='Forbidden')
+    @ns.marshal_with(auth_all_users_response_model, skip_none=True, code=202, description='Accepted')
     @auth_required
     def get(self):
         with db.atomic():
@@ -64,13 +64,13 @@ class AllUsers(Resource):
             return {'status': 'Success', 'users': usernames}, 202
 
 
-@api.route('/activate')
+@ns.route('/activate')
 class UserActivate(Resource):
-    @api.doc(description='Активация учётной записи')
-    @api.response(model=activate_user_response_model, skip_none=True, code=406, description='Not Acceptable')
-    @api.marshal_with(activate_user_response_model, skip_none=True, code=202, description='Accepted')
+    @ns.doc(description='Активация учётной записи')
+    @ns.response(model=activate_user_response_model, skip_none=True, code=406, description='Not Acceptable')
+    @ns.marshal_with(activate_user_response_model, skip_none=True, code=202, description='Accepted')
     def post(self):
-        key = api.payload['key']
+        key = ns.payload['key']
         user_from_keys = SecretKeys.get_or_none(SecretKeys.key == key)
         if user_from_keys:
             with db.atomic():

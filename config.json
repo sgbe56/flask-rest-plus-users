@@ -1,4 +1,12 @@
 {
-    "db_name": "",
-    "secret_key": ""
+    "client": {
+        "db_name": "",
+        "secret_key": ""
+    },
+    "mail":{
+        "mail_server": "",
+        "mail_port": 0,
+        "mail_username": "",
+        "mail_password": ""
+    }
 }
