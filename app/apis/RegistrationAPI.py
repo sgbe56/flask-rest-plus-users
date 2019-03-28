@@ -28,15 +28,24 @@ class Registration(Resource):
             username = ns.payload['username']
             login_exist = AuthManager.register_user(username, ns.payload['password'])
             if not login_exist:
-                with mail.connect() as connection:
-                    msg = Message(body='Test',
-                                  subject='Account activating',
-                                  sender=config.mail.mail_username,
-                                  recipients=[username]
-                                  )
-                    connection.send(msg)
-                return {'status': 'Success', 'message': 'Пользователь зарегистрирован'}, 201
+                # with mail.connect() as connection:
+                #     msg = Message(body='Test',
+                #                   subject='Account activating',
+                #                   sender=config.mail.mail_username,
+                #                   recipients=[username]
+                #                   )
+                #     connection.send(msg)
+                return {
+                           'status': 'Success',
+                           'message': 'Пользователь зарегистрирован'
+                       }, 201
             else:
-                return {'status': 'Error', 'message': 'Логин занят другим пользователем'}, 406
+                return {
+                           'status': 'Error',
+                           'message': 'Логин занят другим пользователем'
+                       }, 406
         else:
-            return {'status': 'Error', 'message': 'Введены не все данные'}, 400
+            return {
+                       'status': 'Error',
+                       'message': 'Введены не все данные'
+                   }, 400

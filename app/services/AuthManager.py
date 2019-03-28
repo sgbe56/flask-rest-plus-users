@@ -2,21 +2,23 @@ from secrets import token_hex
 
 import bcrypt
 
-from app import db
-from app.models.SecretKeys import SecretKeys
+from app import db, TOKEN_LENGTH
+from app.models.AccountActivationKeys import AccountActivationKeys
 from app.models.Users import Users
-
-TOKEN_LENGHT = 16
 
 
 class AuthManager:
     @staticmethod
+    def hash_password(password):
+        return str(bcrypt.hashpw(str.encode(password), bcrypt.gensalt()), 'utf-8')
+
+    @staticmethod
     def register_user(username, password):
-        hash = str(bcrypt.hashpw(str.encode(password), bcrypt.gensalt()), 'utf-8')
+        hash = AuthManager.hash_password(password)
         with db.atomic():
             if not Users.select(Users.username).where(Users.username == username):
                 user = Users.create(username=username, password=hash)
-                SecretKeys.create(user_id=user.id, key=token_hex(TOKEN_LENGHT))
+                AccountActivationKeys.create(user_id=user.id, key=token_hex(TOKEN_LENGTH))
                 return False
             else:
                 return True

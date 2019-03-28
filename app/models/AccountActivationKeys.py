@@ -4,10 +4,10 @@ from app.models.BaseDbModel import BaseDbModel
 from app.models.Users import Users
 
 
-class SecretKeys(BaseDbModel):
+class AccountActivationKeys(BaseDbModel):
     id = PrimaryKeyField(null=False)
-    user_id = ForeignKeyField(model=Users, field=Users.id, unique=True, null=False)
+    user_id = ForeignKeyField(model=Users, field=Users.id, unique=True, null=False, on_delete='CASCADE')
     key = TextField(null=False)
 
 
-SecretKeys.create_table()
+AccountActivationKeys.create_table()

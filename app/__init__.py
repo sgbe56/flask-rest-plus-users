@@ -3,10 +3,12 @@ from flask import Flask
 
 from app.models.Config import Config
 
+TOKEN_LENGTH = 16
+
 config = Config()
 config.load('config.json')
 
-db = peewee.SqliteDatabase(config.client.db_name)
+db = peewee.SqliteDatabase(config.client.db_name, pragmas={'foreign_keys': 1})
 
 from flask_mail import Mail
 
