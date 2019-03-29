@@ -6,6 +6,7 @@ class Config(AbstractConfig):
         db_name = String
         secret_key = String
         password_length = Integer
+        send_mail = Integer
 
     class mail(Section):
         mail_server = String

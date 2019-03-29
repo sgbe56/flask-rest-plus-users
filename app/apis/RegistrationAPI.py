@@ -32,21 +32,15 @@ class Registration(Resource):
                        'message': f'Длина пароля не может быть меньше {PASSWORD_LENGTH} знаков(-а)'
                    }, 406
 
-        if username and password:
-            login_exist = AuthManager.register_user(username, password)
-            if not login_exist:
-                return {
-                           'status': 'Success',
-                           'message': 'Пользователь зарегистрирован'
-                       }, 201
+        login_exist = AuthManager.register_user(username, password)
+        if not login_exist:
+            return {
+                        'status': 'Success',
+                        'message': 'Пользователь зарегистрирован'
+                    }, 201
 
-            else:
-                return {
-                           'status': 'Error',
-                           'message': 'Логин занят другим пользователем'
-                       }, 406
         else:
             return {
-                       'status': 'Error',
-                       'message': 'Введены не все данные'
-                   }, 400
+                        'status': 'Error',
+                        'message': 'Логин занят другим пользователем'
+                    }, 406

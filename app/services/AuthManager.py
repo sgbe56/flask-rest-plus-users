@@ -6,6 +6,7 @@ from flask_mail import Message
 
 from app import db, TOKEN_LENGTH, config
 from app.models.Keys import Keys
+from app.models.KeysTypes import KeysTypes
 from app.models.Users import Users
 from app.services.MailManager import MailManager
 
@@ -23,7 +24,7 @@ class AuthManager:
                 user = Users.create(username=username, password=hash)
 
                 key = token_hex(TOKEN_LENGTH)
-                Keys.create(user_id=user.id, key=key, type='activation')
+                Keys.create(user_id=user.id, key=key, type=KeysTypes.ACTIVATION)
 
                 msg = Message(
                     body=f'Ключ для активации аккаунта: {key}',
@@ -31,7 +32,7 @@ class AuthManager:
                     sender=config.mail.mail_username,
                     recipients=[username]
                 )
-                MailManager.send_mail(msg, False)
+                MailManager.send_mail(msg)
                 return False
             else:
                 return True

@@ -2,7 +2,8 @@
     "client": {
         "db_name": "",
         "secret_key": "",
-        "password_length": 0
+        "password_length": 0,
+        "send_mail": False
     },
     "mail":{
         "mail_server": "",
