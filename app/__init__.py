@@ -8,6 +8,7 @@ TOKEN_LENGTH = 16
 config = Config()
 config.load('config.json')
 
+PASSWORD_LENGTH = config.client.password_length
 db = peewee.SqliteDatabase(config.client.db_name, pragmas={'foreign_keys': 1})
 
 from flask_mail import Mail

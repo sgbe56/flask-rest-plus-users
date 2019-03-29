@@ -5,6 +5,7 @@ class Config(AbstractConfig):
     class client(Section):
         db_name = String
         secret_key = String
+        password_length = Integer
 
     class mail(Section):
         mail_server = String

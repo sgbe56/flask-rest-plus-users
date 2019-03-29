@@ -4,12 +4,12 @@ from flask import session
 from flask_mail import Message
 from flask_restplus import Resource, fields, Namespace
 
-from app import db, TOKEN_LENGTH, mail, config
-from app.models.AccountActivationKeys import AccountActivationKeys
-from app.models.PasswordRecoveryKeys import PassowordRecoveryKeys
+from app import db, TOKEN_LENGTH, config
+from app.models.Keys import Keys
 from app.models.Users import Users
 from app.services.AuthManager import AuthManager
 from app.services.BasicAuthManager import auth_required
+from app.services.MailManager import MailManager
 
 ns = Namespace('UserAPI', path='/user', description='Работа пользователями')
 
@@ -29,6 +29,7 @@ auth_user_response_model = ns.model('AuthUserResponse', {
 class UserData(Resource):
     @ns.doc(description='Получение информации о пользователе')
     @ns.response(model=auth_user_response_model, skip_none=True, code=401, description='Unauthorized')
+    @ns.response(model=auth_user_response_model, skip_none=True, code=406, description='Not Acceptable')
     @ns.marshal_with(auth_user_response_model, skip_none=True, code=200, description='OK')
     @auth_required
     def get(self):
@@ -86,11 +87,11 @@ class UserActivate(Resource):
     @ns.marshal_with(activate_user_response_model, skip_none=True, code=200, description='Accepted')
     def post(self):
         key = ns.payload['key']
-        user_from_keys = AccountActivationKeys.get_or_none(AccountActivationKeys.key == key)
+        user_from_keys = Keys.get_or_none(Keys.key == key and Keys.type == 'activation')
         if user_from_keys:
             with db.atomic():
                 Users.update(active=True).where(Users.id == user_from_keys.user_id).execute()
-                AccountActivationKeys.delete().where(AccountActivationKeys.key == key).execute()
+                Keys.delete().where(Keys.key == key and Keys.type == 'activation').execute()
             return {
                        'status': 'Success',
                        'message': 'Учетная запись активирована'
@@ -123,16 +124,18 @@ class UserRestorePassword(Resource):
         with db.atomic():
             user = Users.get_or_none(Users.username == username)
             if user:
-                user_from_keys = PassowordRecoveryKeys.get_or_none(PassowordRecoveryKeys.user_id == user.id)
+                user_from_keys = Keys.get_or_none(Keys.user_id == user.id and Keys.type == 'recovery')
                 if not user_from_keys:
-                    PassowordRecoveryKeys.create(user_id=user.id, key=token_hex(TOKEN_LENGTH))
-                    # with mail.connect() as connection:
-                    #     msg = Message(body='Test',
-                    #                   subject='Password recover',
-                    #                   sender=config.mail.mail_username,
-                    #                   recipients=[username]
-                    #                   )
-                    #     connection.send(msg)
+                    key = token_hex(TOKEN_LENGTH)
+                    Keys.create(user_id=user.id, key=key, type='recovery')
+
+                    msg = Message(
+                        body=f'Ключ для восстановления пароля: {key}',
+                        subject='Password recover',
+                        sender=config.mail.mail_username,
+                        recipients=[username]
+                    )
+                    MailManager.send_mail(msg, False)
                     return {
                                'status': 'Success',
                                'message': 'Запрос на восстановление пароля отправлен'
@@ -167,18 +170,24 @@ class UserChangePassword(Resource):
     @ns.marshal_with(change_password_response_model, skip_none=True, code=202, description='Accepted')
     def post(self):
         key = ns.payload['key']
-        user_from_keys = PassowordRecoveryKeys.get_or_none(PassowordRecoveryKeys.key == key)
-        if user_from_keys:
-            hash = AuthManager.hash_password(ns.payload['password'])
-            with db.atomic():
-                Users.update(password=hash).where(Users.id == user_from_keys.user_id).execute()
-                PassowordRecoveryKeys.delete().where(PassowordRecoveryKeys.key == key).execute()
-            return {
-                       'status': 'Success',
-                       'message': 'Пароль изменён'
-                   }, 202
+        if key:
+            user_from_keys = Keys.get_or_none(Keys.key == key and Keys.type == 'recovery')
+            if user_from_keys:
+                hash = AuthManager.hash_password(ns.payload['password'])
+                with db.atomic():
+                    Users.update(password=hash).where(Users.id == user_from_keys.user_id).execute()
+                    Keys.delete().where(Keys.key == key and Keys.type == 'recovery').execute()
+                return {
+                           'status': 'Success',
+                           'message': 'Пароль изменён'
+                       }, 202
+            else:
+                return {
+                           'status': 'Error',
+                           'message': 'Заданного ключа не существует'
+                       }, 400
         else:
             return {
                        'status': 'Error',
-                       'message': 'Заданного ключа не существует'
+                       'message': 'Введены не все данные'
                    }, 400

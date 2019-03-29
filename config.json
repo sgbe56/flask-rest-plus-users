@@ -1,7 +1,8 @@
 {
     "client": {
         "db_name": "",
-        "secret_key": ""
+        "secret_key": "",
+        "password_length": 0
     },
     "mail":{
         "mail_server": "",

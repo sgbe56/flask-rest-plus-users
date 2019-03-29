@@ -1,7 +1,6 @@
-from flask_mail import Message
 from flask_restplus import Resource, fields, Namespace
 
-from app import mail, config
+from app import PASSWORD_LENGTH
 from app.services.AuthManager import AuthManager
 
 ns = Namespace('RegistrationAPI', path='/registration', description='Регистрация нового пользователя')
@@ -24,21 +23,23 @@ class Registration(Resource):
     @ns.response(model=registration_response_model, code=406, description='Not Acceptable')
     @ns.marshal_with(registration_response_model, code=201, description='Created')
     def post(self):
-        if ns.payload['username'] and ns.payload['password']:
-            username = ns.payload['username']
-            login_exist = AuthManager.register_user(username, ns.payload['password'])
+        username = ns.payload['username']
+        password = ns.payload['password']
+
+        if len(password) < PASSWORD_LENGTH:
+            return {
+                       'status': 'Error',
+                       'message': f'Длина пароля не может быть меньше {PASSWORD_LENGTH} знаков(-а)'
+                   }, 406
+
+        if username and password:
+            login_exist = AuthManager.register_user(username, password)
             if not login_exist:
-                # with mail.connect() as connection:
-                #     msg = Message(body='Test',
-                #                   subject='Account activating',
-                #                   sender=config.mail.mail_username,
-                #                   recipients=[username]
-                #                   )
-                #     connection.send(msg)
                 return {
                            'status': 'Success',
                            'message': 'Пользователь зарегистрирован'
                        }, 201
+
             else:
                 return {
                            'status': 'Error',
