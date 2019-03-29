@@ -3,7 +3,7 @@
         "db_name": "",
         "secret_key": "",
         "password_length": 0,
-        "send_mail": False
+        "send_mail": 0
     },
     "mail":{
         "mail_server": "",
