@@ -22,7 +22,7 @@ class Registration(Resource):
     @ns.expect(registration_request_model)
     @ns.response(model=registration_response_model, code=400, description='Bad request')
     @ns.response(model=registration_response_model, code=406, description='Not Acceptable')
-    @ns.marshal_with(registration_response_model, code=201, description='Object created')
+    @ns.marshal_with(registration_response_model, code=201, description='Created')
     def post(self):
         if ns.payload['username'] and ns.payload['password']:
             username = ns.payload['username']

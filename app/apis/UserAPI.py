@@ -29,7 +29,7 @@ auth_user_response_model = ns.model('AuthUserResponse', {
 class UserData(Resource):
     @ns.doc(description='Получение информации о пользователе')
     @ns.response(model=auth_user_response_model, skip_none=True, code=401, description='Unauthorized')
-    @ns.marshal_with(auth_user_response_model, skip_none=True, code=202, description='Accepted')
+    @ns.marshal_with(auth_user_response_model, skip_none=True, code=200, description='OK')
     @auth_required
     def get(self):
         if session['username']:
@@ -42,7 +42,7 @@ class UserData(Resource):
                            'username': user.username,
                            'registration_date': str(user.registration_date)
                        }
-                   }, 202
+                   }, 200
 
 
 auth_all_users_response_model = ns.model('AuthAllUsersResponse', {
@@ -57,7 +57,7 @@ class AllUsers(Resource):
     @ns.doc(description='Получение списка всех пользователей')
     @ns.response(model=auth_all_users_response_model, skip_none=True, code=401, description='Unauthorized')
     @ns.response(model=auth_all_users_response_model, skip_none=True, code=403, description='Forbidden')
-    @ns.marshal_with(auth_all_users_response_model, skip_none=True, code=202, description='Accepted')
+    @ns.marshal_with(auth_all_users_response_model, skip_none=True, code=200, description='OK')
     @auth_required
     def get(self):
         with db.atomic():
@@ -66,7 +66,7 @@ class AllUsers(Resource):
             return {
                        'status': 'Success',
                        'users': usernames
-                   }, 202
+                   }, 200
 
 
 activate_user_request_model = ns.model('ActivateUserRequest', {
@@ -83,7 +83,7 @@ class UserActivate(Resource):
     @ns.doc(description='Активация учётной записи')
     @ns.expect(activate_user_request_model)
     @ns.response(model=activate_user_response_model, skip_none=True, code=400, description='Bad request')
-    @ns.marshal_with(activate_user_response_model, skip_none=True, code=202, description='Accepted')
+    @ns.marshal_with(activate_user_response_model, skip_none=True, code=200, description='Accepted')
     def post(self):
         key = ns.payload['key']
         user_from_keys = AccountActivationKeys.get_or_none(AccountActivationKeys.key == key)
