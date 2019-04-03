@@ -7,6 +7,7 @@ class Config(AbstractConfig):
         secret_key = String
         password_length = Integer
         send_mail = Integer
+        is_test = Integer
 
     class mail(Section):
         mail_server = String

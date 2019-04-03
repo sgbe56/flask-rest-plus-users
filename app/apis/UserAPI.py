@@ -88,11 +88,11 @@ class UserActivate(Resource):
     @ns.marshal_with(activate_user_response_model, skip_none=True, code=200, description='Accepted')
     def post(self):
         key = ns.payload['key']
-        user_from_keys = Keys.get_or_none(Keys.key == key and Keys.type == KeysTypes.ACTIVATION)
+        user_from_keys = Keys.get_or_none(Keys.key == key and Keys.type == KeysTypes.ACTIVATION.value)
         if user_from_keys:
             with db.atomic():
                 Users.update(active=True).where(Users.id == user_from_keys.user_id).execute()
-                Keys.delete().where(Keys.key == key and Keys.type == KeysTypes.ACTIVATION).execute()
+                Keys.delete().where(Keys.key == key and Keys.type == KeysTypes.ACTIVATION.value).execute()
             return {
                        'status': 'Success',
                        'message': 'Учетная запись активирована'
@@ -125,10 +125,10 @@ class UserRestorePassword(Resource):
         with db.atomic():
             user = Users.get_or_none(Users.username == username)
             if user:
-                user_from_keys = Keys.get_or_none(Keys.user_id == user.id and Keys.type == KeysTypes.RECOVERY)
+                user_from_keys = Keys.get_or_none(Keys.user_id == user.id and Keys.type == KeysTypes.RECOVERY.value)
                 if not user_from_keys:
                     key = token_hex(TOKEN_LENGTH)
-                    Keys.create(user_id=user.id, key=key, type=KeysTypes.RECOVERY)
+                    Keys.create(user_id=user.id, key=key, type=KeysTypes.RECOVERY.value)
 
                     msg = Message(
                         body=f'Ключ для восстановления пароля: {key}',
@@ -174,7 +174,7 @@ class UserChangePassword(Resource):
         key = ns.payload['key']
         password = ns.payload['password']
 
-        user_from_keys = Keys.get_or_none(Keys.key == key and Keys.type == KeysTypes.RECOVERY)
+        user_from_keys = Keys.get_or_none(Keys.key == key and Keys.type == KeysTypes.RECOVERY.value)
         if user_from_keys:
             if len(password) < PASSWORD_LENGTH:
                 return {
@@ -185,7 +185,7 @@ class UserChangePassword(Resource):
             hash = AuthManager.hash_password(password)
             with db.atomic():
                 Users.update(password=hash).where(Users.id == user_from_keys.user_id).execute()
-                Keys.delete().where(Keys.key == key and Keys.type == KeysTypes.RECOVERY).execute()
+                Keys.delete().where(Keys.key == key and Keys.type == KeysTypes.RECOVERY.value).execute()
             return {
                        'status': 'Success',
                        'message': 'Пароль изменён'

@@ -6,7 +6,7 @@ from app.models.Users import Users
 
 class Keys(BaseDbModel):
     id = PrimaryKeyField(null=False)
-    user_id = ForeignKeyField(model=Users, field=Users.id, unique=True, null=False, on_delete='CASCADE')
+    user_id = ForeignKeyField(model=Users, field=Users.id, null=False, on_delete='CASCADE')
     key = TextField(null=False)
     type = TextField(null=False)
 

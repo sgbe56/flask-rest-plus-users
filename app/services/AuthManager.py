@@ -24,7 +24,7 @@ class AuthManager:
                 user = Users.create(username=username, password=hash)
 
                 key = token_hex(TOKEN_LENGTH)
-                Keys.create(user_id=user.id, key=key, type=KeysTypes.ACTIVATION)
+                Keys.create(user_id=user.id, key=key, type=KeysTypes.ACTIVATION.value)
 
                 msg = Message(
                     body=f'Ключ для активации аккаунта: {key}',
